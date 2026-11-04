@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   isNativeBridgeAvailable,
   shareToInstagramDirect,
@@ -8,8 +8,12 @@ import {
   type InstagramShareResult,
 } from "@/lib/instagramBridge";
 
-const DEMO_IMAGE_URL = "https://picsum.photos/1080/1920";
-const DEMO_LINK_URL = "https://example.com/product/123";
+export interface BookInfo {
+  title: string;
+  author: string;
+  price: string;
+  productUrl: string;
+}
 
 function describeResult(result: InstagramShareResult): string {
   switch (result.status) {
@@ -28,10 +32,37 @@ function describeResult(result: InstagramShareResult): string {
   }
 }
 
-export default function InstagramShareDemo() {
+export default function InstagramShareDemo({ book }: { book: BookInfo }) {
   const [log, setLog] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [bridgeAvailable, setBridgeAvailable] = useState(() => isNativeBridgeAvailable());
+
+  // Built from the book's own product data — this is the card Instagram will show as the
+  // story background / shared image, composed server-side by /api/book-share-card.
+  const shareImageUrl = useMemo(() => {
+    const params = new URLSearchParams({
+      title: book.title,
+      author: book.author,
+      price: book.price,
+    });
+    const path = `/api/book-share-card?${params.toString()}`;
+    return typeof window === "undefined" ? path : new URL(path, window.location.origin).toString();
+  }, [book]);
+
+  // Transparent, card-only render shared as Instagram's "interactive sticker" asset —
+  // unlike shareImageUrl above (a full-bleed background), this one lands as a movable,
+  // resizable sticker in Instagram's own story editor, composed by /api/book-share-sticker.
+  const stickerImageUrl = useMemo(() => {
+    const params = new URLSearchParams({
+      title: book.title,
+      author: book.author,
+      price: book.price,
+    });
+    const path = `/api/book-share-sticker?${params.toString()}`;
+    return typeof window === "undefined" ? path : new URL(path, window.location.origin).toString();
+  }, [book]);
+
+  const shareText = `[${book.title}] ${book.price} — 교보문고에서 보기`;
 
   useEffect(() => {
     // Android's addJavascriptInterface binding can take a moment to attach
@@ -75,9 +106,9 @@ export default function InstagramShareDemo() {
     }
     try {
       await navigator.share({
-        title: "Instagram Share Demo",
-        text: "브라우저 Web Share API 테스트",
-        url: DEMO_LINK_URL,
+        title: book.title,
+        text: shareText,
+        url: book.productUrl,
       });
       appendLog("✅ Web Share API 공유 시트 호출됨");
     } catch (err) {
@@ -98,16 +129,16 @@ export default function InstagramShareDemo() {
       return;
     }
     try {
-      const response = await fetch(DEMO_IMAGE_URL);
+      const response = await fetch(shareImageUrl);
       const blob = await response.blob();
-      const file = new File([blob], "share.jpg", { type: blob.type || "image/jpeg" });
+      const file = new File([blob], "book-share.png", { type: blob.type || "image/png" });
 
       if (navigator.canShare && !navigator.canShare({ files: [file] })) {
         appendLog("⚠️ 이 브라우저는 이미지 파일 공유를 지원하지 않습니다");
         return;
       }
 
-      await navigator.share({ files: [file], text: "이거 한번 봐봐!" });
+      await navigator.share({ files: [file], text: shareText });
       appendLog("✅ 네이티브 브릿지 없이 Web Share API로 공유 시트 호출됨");
     } catch (err) {
       appendLog(`⚠️ 공유 취소/실패: ${(err as Error).message}`);
@@ -134,10 +165,10 @@ export default function InstagramShareDemo() {
           onClick={() =>
             runShare("스토리 공유", () =>
               shareToInstagramStory({
-                imageUrl: DEMO_IMAGE_URL,
-                linkUrl: DEMO_LINK_URL,
-                backgroundTopColor: "#4169F5",
-                backgroundBottomColor: "#1A1A2E",
+                imageUrl: shareImageUrl,
+                linkUrl: book.productUrl,
+                backgroundTopColor: "#3a5a8c",
+                backgroundBottomColor: "#0c1222",
               }),
             )
           }
@@ -150,10 +181,28 @@ export default function InstagramShareDemo() {
           type="button"
           disabled={pending}
           onClick={() =>
+            runShare("스토리 공유 (움직이는 카드 스티커)", () =>
+              shareToInstagramStory({
+                stickerImageUrl,
+                linkUrl: book.productUrl,
+                backgroundTopColor: "#3a5a8c",
+                backgroundBottomColor: "#0c1222",
+              }),
+            )
+          }
+          className="h-12 rounded-full bg-foreground px-5 text-background font-medium transition-colors hover:bg-[#383838] disabled:opacity-50 dark:hover:bg-[#ccc]"
+        >
+          인스타그램 스토리에 공유 (카드 스티커, 드래그/리사이즈 가능)
+        </button>
+
+        <button
+          type="button"
+          disabled={pending}
+          onClick={() =>
             runShare("DM 공유", () =>
               shareToInstagramDirect({
-                imageUrl: DEMO_IMAGE_URL,
-                text: "이거 한번 봐봐!",
+                imageUrl: shareImageUrl,
+                text: shareText,
               }),
             )
           }

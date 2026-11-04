@@ -1,5 +1,6 @@
 package com.example.instagramshare
 
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.webkit.JavascriptInterface
@@ -61,18 +62,43 @@ class InstagramBridge(
     private fun shareToStory(payload: JSONObject): JSONObject {
         if (!isInstagramInstalled()) return unavailableResult("not_installed")
 
-        val imageUrl = payload.getString("imageUrl")
+        val imageUrl = payload.opt("imageUrl") as? String
+        val stickerImageUrl = payload.opt("stickerImageUrl") as? String
         val linkUrl = payload.opt("linkUrl") as? String
-        val imageFile = downloadImage(imageUrl, "story_bg.png")
-        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
+        val topColor = payload.opt("backgroundTopColor") as? String
+        val bottomColor = payload.opt("backgroundBottomColor") as? String
 
         val intent = Intent("com.instagram.share.ADD_TO_STORY").apply {
-            setDataAndType(uri, "image/png")
+            type = "image/png"
             putExtra("source_application", context.packageName)
-            linkUrl?.let { putExtra("content_url", it) }
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
+
+        if (imageUrl != null) {
+            // Full-bleed background image path (original behavior).
+            val backgroundFile = downloadImage(imageUrl, "story_bg.png")
+            val backgroundUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", backgroundFile)
+            intent.setDataAndType(backgroundUri, "image/png")
+        } else {
+            // No background image: fall back to a plain color/gradient background extra,
+            // which is what the sticker (if any) is meant to sit on top of.
+            topColor?.let { intent.putExtra("top_background_color", it) }
+            bottomColor?.let { intent.putExtra("bottom_background_color", it) }
+        }
+
+        if (stickerImageUrl != null) {
+            // Dropped onto the story as a separate, user-draggable/resizable asset — the
+            // same mechanism Spotify/Apple Music use for their "now playing" sticker.
+            val stickerFile = downloadImage(stickerImageUrl, "story_sticker.png")
+            val stickerUri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", stickerFile)
+            intent.putExtra("interactive_asset_uri", stickerUri)
+            // Only the intent's own setData() Uri gets an automatic read-permission grant;
+            // this clipData extends that grant to the Uri referenced by the extra above.
+            intent.clipData = ClipData.newUri(context.contentResolver, "sticker", stickerUri)
+        }
+
+        linkUrl?.let { intent.putExtra("content_url", it) }
 
         if (intent.resolveActivity(context.packageManager) == null) {
             return unavailableResult("unsupported_platform")

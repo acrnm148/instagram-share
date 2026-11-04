@@ -21,8 +21,21 @@ export type InstagramShareResult =
   | { status: "error"; message: string };
 
 export interface ShareStoryPayload {
-  /** Remote https URL of the background image. Native must download it to a local file before sharing. */
-  imageUrl: string;
+  /**
+   * Remote https URL of the full-bleed background image. Native must download it to a
+   * local file before sharing. Omit this (and use backgroundTopColor/backgroundBottomColor
+   * instead) when sharing a stickerImageUrl, so the sticker sits on a plain gradient
+   * instead of on top of another image.
+   */
+  imageUrl?: string;
+  /**
+   * Remote https URL of a transparent PNG rendered as a movable, resizable sticker on top
+   * of the background — the same mechanism Spotify/Apple Music use for their "now playing"
+   * card. The user can drag, resize, and rotate it inside Instagram's own story editor after
+   * sharing. Falls back to a plain background-only story if the installed Instagram version
+   * doesn't support interactive stickers.
+   */
+  stickerImageUrl?: string;
   /** Optional link shown as a "swipe up" / sticker link attribution on the story. */
   linkUrl?: string;
   backgroundTopColor?: string;
