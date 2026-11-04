@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
 import { BookCard } from "../_shared/BookCard";
+import { getDominantColor } from "../_shared/dominantColor";
 
 const WIDTH = 1080;
 const HEIGHT = 1920;
@@ -10,6 +11,7 @@ export async function GET(request: NextRequest) {
   const title = searchParams.get("title") ?? "달러구트 꿈 백화점";
   const author = searchParams.get("author") ?? "이미예 지음";
   const cover = searchParams.get("cover");
+  const background = cover ? await getDominantColor(cover) : "#e8e8ec";
 
   return new ImageResponse(
     (
@@ -20,7 +22,7 @@ export async function GET(request: NextRequest) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#ffffff",
+          background,
           fontFamily: "sans-serif",
         }}
       >

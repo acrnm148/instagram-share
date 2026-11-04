@@ -37,6 +37,19 @@ export default function InstagramShareDemo({ book }: { book: BookInfo }) {
   const [log, setLog] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
   const [bridgeAvailable, setBridgeAvailable] = useState(() => isNativeBridgeAvailable());
+  // The book cover's average color, used as the Instagram story background behind the
+  // card — same idea as Spotify/Apple Music tinting a share's background from the art.
+  const [bgColor, setBgColor] = useState("#e8e8ec");
+
+  useEffect(() => {
+    const params = new URLSearchParams({ cover: book.coverImageUrl });
+    fetch(`/api/book-dominant-color?${params.toString()}`)
+      .then((res) => res.json())
+      .then((data: { color?: string }) => {
+        if (data.color) setBgColor(data.color);
+      })
+      .catch(() => {});
+  }, [book.coverImageUrl]);
 
   // Built from the book's own product data — this is the card Instagram will show as the
   // story background / shared image, composed server-side by /api/book-share-card.
@@ -170,8 +183,8 @@ export default function InstagramShareDemo({ book }: { book: BookInfo }) {
               shareToInstagramStory({
                 imageUrl: shareImageUrl,
                 linkUrl: book.productUrl,
-                backgroundTopColor: "#ffffff",
-                backgroundBottomColor: "#ffffff",
+                backgroundTopColor: bgColor,
+                backgroundBottomColor: bgColor,
               }),
             )
           }
@@ -188,8 +201,8 @@ export default function InstagramShareDemo({ book }: { book: BookInfo }) {
               shareToInstagramStory({
                 stickerImageUrl,
                 linkUrl: book.productUrl,
-                backgroundTopColor: "#ffffff",
-                backgroundBottomColor: "#ffffff",
+                backgroundTopColor: bgColor,
+                backgroundBottomColor: bgColor,
               }),
             )
           }

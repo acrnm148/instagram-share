@@ -4,23 +4,23 @@
 // Layout mirrors Spotify's "share to story" sticker: cover art flush to the card's
 // inner edges at its own natural proportions (no cropping/stretching to a fixed box),
 // so the card's overall shape follows the book cover's — tall and narrow, not square.
-const CARD_WIDTH = 760;
-const PADDING = 32;
+const CARD_WIDTH = 600;
+const PADDING = 28;
 
 // Korean book covers run ~400:578 (width:height) — the card is exactly this ratio at
 // its full inner width, rather than force-cropping into an arbitrary box shape.
 const IMAGE_WIDTH = CARD_WIDTH - PADDING * 2;
 const IMAGE_HEIGHT = Math.round((IMAGE_WIDTH * 578) / 400);
 
-const TITLE_SIZE = 64;
+const TITLE_SIZE = 50;
 const TITLE_HEIGHT = Math.round(TITLE_SIZE * 1.25);
-const AUTHOR_SIZE = 28;
+const AUTHOR_SIZE = 22;
 const AUTHOR_HEIGHT = Math.round(AUTHOR_SIZE * 1.3);
-const BRAND_SIZE = 26;
+const BRAND_SIZE = 20;
 const BRAND_HEIGHT = Math.round(BRAND_SIZE * 1.3);
-const GAP_AFTER_IMAGE = 36;
-const GAP_AFTER_TITLE = 10;
-const GAP_AFTER_AUTHOR = 28;
+const GAP_AFTER_IMAGE = 28;
+const GAP_AFTER_TITLE = 8;
+const GAP_AFTER_AUTHOR = 22;
 
 // Precomputed so the ImageResponse canvas is sized exactly to its content — satori
 // renders to a fixed-size raster, it can't size the canvas to content automatically.
