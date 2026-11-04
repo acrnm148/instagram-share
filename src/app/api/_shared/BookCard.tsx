@@ -13,9 +13,7 @@ const PADDING = 32;
 const IMAGE_WIDTH = CARD_WIDTH - PADDING * 2;
 const IMAGE_HEIGHT = 780;
 
-// The source logo (public/kyobo-logo.png) has an opaque white square background, not
-// transparency, so it's shown inside its own white badge rather than directly on the
-// dark card — satori can't read local files by path, so it's inlined as a data URI.
+// satori can't read local files by path, so the logo is inlined as a data URI.
 const LOGO_DATA_URI = `data:image/png;base64,${readFileSync(
   join(process.cwd(), "public", "kyobo-logo.png"),
 ).toString("base64")}`;
@@ -36,8 +34,9 @@ export function BookCard({
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
         borderRadius: 28,
-        background: "linear-gradient(165deg, #1c2333 0%, #0f1320 100%)",
-        boxShadow: "0 40px 100px rgba(0,0,0,0.5)",
+        background: "#ffffff",
+        border: "1px solid #e8e8ec",
+        boxShadow: "0 30px 80px rgba(0,0,0,0.18)",
         flexDirection: "column",
         padding: PADDING,
       }}
@@ -80,30 +79,17 @@ export function BookCard({
           display: "flex",
           fontSize: 44,
           fontWeight: 700,
-          color: "#ffffff",
+          color: "#16213e",
           lineHeight: 1.25,
           marginTop: 28,
         }}
       >
         {title}
       </div>
-      <div style={{ display: "flex", fontSize: 24, color: "#9aa3b5", marginTop: 8 }}>{author}</div>
+      <div style={{ display: "flex", fontSize: 24, color: "#6b7280", marginTop: 8 }}>{author}</div>
 
-      <div
-        style={{
-          display: "flex",
-          width: 76,
-          height: 76,
-          borderRadius: 16,
-          background: "#ffffff",
-          alignItems: "center",
-          justifyContent: "center",
-          marginTop: 28,
-        }}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
-        <img src={LOGO_DATA_URI} alt="" width={56} height={56} style={{ width: 56, height: 56 }} />
-      </div>
+      {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
+      <img src={LOGO_DATA_URI} alt="" width={64} height={64} style={{ width: 64, height: 64, marginTop: 28 }} />
     </div>
   );
 }

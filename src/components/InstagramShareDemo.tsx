@@ -170,8 +170,8 @@ export default function InstagramShareDemo({ book }: { book: BookInfo }) {
               shareToInstagramStory({
                 imageUrl: shareImageUrl,
                 linkUrl: book.productUrl,
-                backgroundTopColor: "#3a5a8c",
-                backgroundBottomColor: "#0c1222",
+                backgroundTopColor: "#ffffff",
+                backgroundBottomColor: "#ffffff",
               }),
             )
           }
@@ -188,8 +188,8 @@ export default function InstagramShareDemo({ book }: { book: BookInfo }) {
               shareToInstagramStory({
                 stickerImageUrl,
                 linkUrl: book.productUrl,
-                backgroundTopColor: "#3a5a8c",
-                backgroundBottomColor: "#0c1222",
+                backgroundTopColor: "#ffffff",
+                backgroundBottomColor: "#ffffff",
               }),
             )
           }

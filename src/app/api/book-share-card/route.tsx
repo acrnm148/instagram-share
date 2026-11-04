@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "linear-gradient(160deg, #1b2a4a 0%, #0c1222 70%)",
+          background: "#ffffff",
           fontFamily: "sans-serif",
         }}
       >
