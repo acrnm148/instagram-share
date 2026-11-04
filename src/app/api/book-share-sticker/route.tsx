@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import type { NextRequest } from "next/server";
-import { BookCard, CARD_WIDTH, CARD_HEIGHT } from "../_shared/BookCard";
+import { BookCard, CARD_WIDTH, CARD_HEIGHT, BRAND_TEXT, FALLBACK_TEXT } from "../_shared/BookCard";
+import { getBookCardFonts } from "../_shared/fonts";
 
 // Card-only, transparent-background render meant to be shared as an Instagram Story
 // "interactive sticker" asset (interactive_asset_uri / com.instagram.sharedSticker.stickerImage)
@@ -12,9 +13,11 @@ export async function GET(request: NextRequest) {
   const title = searchParams.get("title") ?? "달러구트 꿈 백화점";
   const author = searchParams.get("author") ?? "이미예 지음";
   const cover = searchParams.get("cover");
+  const fonts = await getBookCardFonts(`${title}${author}${BRAND_TEXT}${FALLBACK_TEXT}`);
 
   return new ImageResponse(<BookCard title={title} author={author} cover={cover} />, {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
+    fonts,
   });
 }
