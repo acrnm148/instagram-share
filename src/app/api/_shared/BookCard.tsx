@@ -10,8 +10,10 @@ import { join } from "node:path";
 const CARD_WIDTH = 760;
 const CARD_HEIGHT = 1080;
 const PADDING = 32;
-const IMAGE_WIDTH = CARD_WIDTH - PADDING * 2;
-const IMAGE_HEIGHT = 780;
+// Korean book covers run ~400:578 (width:height) — kept smaller than the card's full
+// inner width now, at that same ratio, instead of stretching/cropping to fill it.
+const IMAGE_WIDTH = 420;
+const IMAGE_HEIGHT = Math.round((IMAGE_WIDTH * 578) / 400);
 
 // satori can't read local files by path, so the logo is inlined as a data URI.
 const LOGO_DATA_URI = `data:image/png;base64,${readFileSync(
@@ -51,9 +53,9 @@ export function BookCard({
           style={{
             width: IMAGE_WIDTH,
             height: IMAGE_HEIGHT,
-            objectFit: "cover",
-            objectPosition: "top",
-            borderRadius: 16,
+            objectFit: "contain",
+            borderRadius: 12,
+            boxShadow: "0 12px 30px rgba(0,0,0,0.18)",
           }}
         />
       ) : (
@@ -77,19 +79,19 @@ export function BookCard({
       <div
         style={{
           display: "flex",
-          fontSize: 44,
+          fontSize: 64,
           fontWeight: 700,
           color: "#16213e",
           lineHeight: 1.25,
-          marginTop: 28,
+          marginTop: 36,
         }}
       >
         {title}
       </div>
-      <div style={{ display: "flex", fontSize: 24, color: "#6b7280", marginTop: 8 }}>{author}</div>
+      <div style={{ display: "flex", fontSize: 28, color: "#6b7280", marginTop: 10 }}>{author}</div>
 
       {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
-      <img src={LOGO_DATA_URI} alt="" width={64} height={64} style={{ width: 64, height: 64, marginTop: 28 }} />
+      <img src={LOGO_DATA_URI} alt="" width={64} height={64} style={{ width: 64, height: 64, marginTop: 36 }} />
     </div>
   );
 }
