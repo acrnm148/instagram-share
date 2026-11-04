@@ -82,8 +82,13 @@ class InstagramBridge(
     }
 
     /**
-     * Instagram has no API to target a specific DM recipient. This opens Instagram's own
-     * share screen with the content; the user picks "Direct" and a recipient inside it.
+     * Instagram has no *public, documented* API to target a specific DM recipient.
+     * It does, however, ship an internal activity (found via `dumpsys package
+     * com.instagram.android`, not from any Instagram documentation) that opens straight
+     * to its recipient-search screen instead of the generic Feed/Messages/Reels/Stories
+     * chooser. Since that's an undocumented implementation detail, it can change or
+     * disappear in a future Instagram update — resolveActivity() guards against that,
+     * and we fall back to the generic share sheet if the direct target is gone.
      */
     private fun shareGeneric(payload: JSONObject): JSONObject {
         if (!isInstagramInstalled()) return unavailableResult("not_installed")
@@ -91,25 +96,40 @@ class InstagramBridge(
         val text = payload.optString("text", "")
         val imageUrl = payload.opt("imageUrl") as? String
 
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            setPackage(instagramPackage)
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            if (imageUrl != null) {
-                val imageFile = downloadImage(imageUrl, "direct_share.jpg")
-                val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
-                type = "image/*"
-                putExtra(Intent.EXTRA_STREAM, uri)
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            } else {
-                type = "text/plain"
-            }
-            if (text.isNotEmpty()) putExtra(Intent.EXTRA_TEXT, text)
+        if (imageUrl == null) {
+            return errorResult("shareGeneric requires imageUrl")
         }
 
-        if (intent.resolveActivity(context.packageManager) == null) {
+        val imageFile = downloadImage(imageUrl, "direct_share.jpg")
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
+
+        val directToRecipientPicker = Intent("com.instagram.share.ADD_TO_DIRECT_MESSAGING").apply {
+            setClassName(instagramPackage, "com.instagram.direct.share.handler.DirectExternalMediaShareActivityPhoto")
+            setDataAndType(uri, "image/*")
+            putExtra(Intent.EXTRA_STREAM, uri)
+            if (text.isNotEmpty()) putExtra(Intent.EXTRA_TEXT, text)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        if (directToRecipientPicker.resolveActivity(context.packageManager) != null) {
+            context.startActivity(directToRecipientPicker)
+            return successResult()
+        }
+
+        val shareSheetFallback = Intent(Intent.ACTION_SEND).apply {
+            setPackage(instagramPackage)
+            type = "image/*"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            if (text.isNotEmpty()) putExtra(Intent.EXTRA_TEXT, text)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        if (shareSheetFallback.resolveActivity(context.packageManager) == null) {
             return unavailableResult("unsupported_platform")
         }
-        context.startActivity(intent)
+        context.startActivity(shareSheetFallback)
         return successResult()
     }
 

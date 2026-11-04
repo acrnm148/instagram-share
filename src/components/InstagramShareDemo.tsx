@@ -31,15 +31,12 @@ function describeResult(result: InstagramShareResult): string {
 export default function InstagramShareDemo() {
   const [log, setLog] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
-  const [bridgeAvailable, setBridgeAvailable] = useState(false);
+  const [bridgeAvailable, setBridgeAvailable] = useState(() => isNativeBridgeAvailable());
 
   useEffect(() => {
     // Android's addJavascriptInterface binding can take a moment to attach
     // after the page first loads, so poll briefly instead of checking once.
-    if (isNativeBridgeAvailable()) {
-      setBridgeAvailable(true);
-      return;
-    }
+    if (bridgeAvailable) return;
     const interval = setInterval(() => {
       if (isNativeBridgeAvailable()) {
         setBridgeAvailable(true);
@@ -51,7 +48,7 @@ export default function InstagramShareDemo() {
       clearInterval(interval);
       clearTimeout(timeout);
     };
-  }, []);
+  }, [bridgeAvailable]);
 
   const appendLog = (line: string) => setLog((prev) => [...prev, line]);
 
@@ -83,6 +80,35 @@ export default function InstagramShareDemo() {
         url: DEMO_LINK_URL,
       });
       appendLog("✅ Web Share API 공유 시트 호출됨");
+    } catch (err) {
+      appendLog(`⚠️ 공유 취소/실패: ${(err as Error).message}`);
+    }
+  };
+
+  /**
+   * No native bridge involved: navigator.share() hands the image straight to the OS
+   * share sheet, which on Android already lists Instagram's Feed/Messages/Reels/Stories
+   * targets (same ones InstagramBridge's generic ACTION_SEND path reaches). Requires a
+   * secure context (HTTPS) and, on iOS, Instagram typically isn't registered as a share
+   * target at all, so it won't show up there.
+   */
+  const handleWebShareImage = async () => {
+    if (!navigator.share) {
+      appendLog("⚠️ 이 브라우저는 Web Share API를 지원하지 않습니다");
+      return;
+    }
+    try {
+      const response = await fetch(DEMO_IMAGE_URL);
+      const blob = await response.blob();
+      const file = new File([blob], "share.jpg", { type: blob.type || "image/jpeg" });
+
+      if (navigator.canShare && !navigator.canShare({ files: [file] })) {
+        appendLog("⚠️ 이 브라우저는 이미지 파일 공유를 지원하지 않습니다");
+        return;
+      }
+
+      await navigator.share({ files: [file], text: "이거 한번 봐봐!" });
+      appendLog("✅ 네이티브 브릿지 없이 Web Share API로 공유 시트 호출됨");
     } catch (err) {
       appendLog(`⚠️ 공유 취소/실패: ${(err as Error).message}`);
     }
@@ -138,10 +164,18 @@ export default function InstagramShareDemo() {
 
         <button
           type="button"
+          onClick={handleWebShareImage}
+          className="h-12 rounded-full border border-dashed border-black/[.15] px-5 text-sm transition-colors hover:bg-black/[.04] dark:border-white/[.2] dark:hover:bg-[#1a1a1a]"
+        >
+          인스타그램으로 공유 (DM, 브릿지 없이)
+        </button>
+
+        <button
+          type="button"
           onClick={handleWebShareFallback}
           className="h-12 rounded-full border border-dashed border-black/[.15] px-5 text-sm transition-colors hover:bg-black/[.04] dark:border-white/[.2] dark:hover:bg-[#1a1a1a]"
         >
-          브라우저에서 테스트 (Web Share API)
+          브라우저에서 테스트 (Web Share API, 텍스트/링크만)
         </button>
       </div>
 
