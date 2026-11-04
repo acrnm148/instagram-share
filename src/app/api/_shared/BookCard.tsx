@@ -40,7 +40,10 @@ export function BookCard({
         border: "1px solid #e8e8ec",
         boxShadow: "0 30px 80px rgba(0,0,0,0.18)",
         flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
         padding: PADDING,
+        textAlign: "center",
       }}
     >
       {cover ? (
@@ -79,16 +82,31 @@ export function BookCard({
       <div
         style={{
           display: "flex",
+          maxWidth: CARD_WIDTH - PADDING * 2,
+          justifyContent: "center",
           fontSize: 64,
           fontWeight: 700,
           color: "#16213e",
           lineHeight: 1.25,
           marginTop: 36,
+          textAlign: "center",
         }}
       >
         {title}
       </div>
-      <div style={{ display: "flex", fontSize: 28, color: "#6b7280", marginTop: 10 }}>{author}</div>
+      <div
+        style={{
+          display: "flex",
+          maxWidth: CARD_WIDTH - PADDING * 2,
+          justifyContent: "center",
+          fontSize: 28,
+          color: "#6b7280",
+          marginTop: 10,
+          textAlign: "center",
+        }}
+      >
+        {author}
+      </div>
 
       {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
       <img src={LOGO_DATA_URI} alt="" width={64} height={64} style={{ width: 64, height: 64, marginTop: 36 }} />
