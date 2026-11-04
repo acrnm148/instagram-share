@@ -1,14 +1,24 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
 // Shared by book-share-card and book-share-sticker's ImageResponse renders — not a
 // route (lives outside any route.tsx), just a JSX factory for the 760x1080 card itself.
 //
 // Layout mirrors Spotify's "share to story" sticker: cover art flush to the card's inner
-// edges, left-aligned title/author directly under it, and a small platform wordmark row
+// edges, left-aligned title/author directly under it, and a small platform logo badge
 // at the bottom — rather than the old centered, mostly-empty text card.
 const CARD_WIDTH = 760;
 const CARD_HEIGHT = 1080;
 const PADDING = 32;
 const IMAGE_WIDTH = CARD_WIDTH - PADDING * 2;
-const IMAGE_HEIGHT = 820;
+const IMAGE_HEIGHT = 780;
+
+// The source logo (public/kyobo-logo.png) has an opaque white square background, not
+// transparency, so it's shown inside its own white badge rather than directly on the
+// dark card — satori can't read local files by path, so it's inlined as a data URI.
+const LOGO_DATA_URI = `data:image/png;base64,${readFileSync(
+  join(process.cwd(), "public", "kyobo-logo.png"),
+).toString("base64")}`;
 
 export function BookCard({
   title,
@@ -79,23 +89,20 @@ export function BookCard({
       </div>
       <div style={{ display: "flex", fontSize: 24, color: "#9aa3b5", marginTop: 8 }}>{author}</div>
 
-      <div style={{ display: "flex", alignItems: "center", marginTop: 28 }}>
-        <div
-          style={{
-            display: "flex",
-            width: 28,
-            height: 28,
-            borderRadius: 6,
-            background: "#ffd54a",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <span style={{ display: "flex", fontSize: 16, fontWeight: 700, color: "#16213e" }}>교</span>
-        </div>
-        <span style={{ display: "flex", fontSize: 22, fontWeight: 700, color: "#ffffff", marginLeft: 10 }}>
-          교보문고
-        </span>
+      <div
+        style={{
+          display: "flex",
+          width: 76,
+          height: 76,
+          borderRadius: 16,
+          background: "#ffffff",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: 28,
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
+        <img src={LOGO_DATA_URI} alt="" width={56} height={56} style={{ width: 56, height: 56 }} />
       </div>
     </div>
   );
