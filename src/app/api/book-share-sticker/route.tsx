@@ -13,6 +13,7 @@ export async function GET(request: NextRequest) {
   const title = searchParams.get("title") ?? "달러구트 꿈 백화점";
   const author = searchParams.get("author") ?? "이미예 지음";
   const price = searchParams.get("price") ?? "14,800원";
+  const cover = searchParams.get("cover");
 
   return new ImageResponse(
     (
@@ -27,26 +28,44 @@ export async function GET(request: NextRequest) {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          padding: 64,
+          padding: 56,
           textAlign: "center",
           fontFamily: "sans-serif",
         }}
       >
+        {cover ? (
+          // eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image
+          <img
+            src={cover}
+            alt=""
+            width={420}
+            height={620}
+            style={{
+              width: 420,
+              height: 620,
+              objectFit: "cover",
+              borderRadius: 12,
+              boxShadow: "0 24px 60px rgba(0,0,0,0.45)",
+              marginBottom: 36,
+            }}
+          />
+        ) : (
+          <div
+            style={{
+              display: "flex",
+              fontSize: 28,
+              letterSpacing: 6,
+              color: "#9fb4d8",
+              marginBottom: 28,
+            }}
+          >
+            BESTSELLER
+          </div>
+        )}
         <div
           style={{
             display: "flex",
-            fontSize: 28,
-            letterSpacing: 6,
-            color: "#9fb4d8",
-            marginBottom: 28,
-          }}
-        >
-          BESTSELLER
-        </div>
-        <div
-          style={{
-            display: "flex",
-            fontSize: 64,
+            fontSize: cover ? 48 : 64,
             fontWeight: 700,
             color: "#ffffff",
             lineHeight: 1.3,
@@ -57,14 +76,14 @@ export async function GET(request: NextRequest) {
         <div
           style={{
             display: "flex",
-            fontSize: 30,
+            fontSize: 26,
             color: "#c7d3ea",
-            marginTop: 32,
+            marginTop: 16,
           }}
         >
           {author}
         </div>
-        <div style={{ display: "flex", fontSize: 44, fontWeight: 700, color: "#ffffff", marginTop: 56 }}>
+        <div style={{ display: "flex", fontSize: 44, fontWeight: 700, color: "#ffffff", marginTop: 40 }}>
           {price}
         </div>
         <div

@@ -13,6 +13,7 @@ export interface BookInfo {
   author: string;
   price: string;
   productUrl: string;
+  coverImageUrl: string;
 }
 
 function describeResult(result: InstagramShareResult): string {
@@ -44,6 +45,7 @@ export default function InstagramShareDemo({ book }: { book: BookInfo }) {
       title: book.title,
       author: book.author,
       price: book.price,
+      cover: book.coverImageUrl,
     });
     const path = `/api/book-share-card?${params.toString()}`;
     return typeof window === "undefined" ? path : new URL(path, window.location.origin).toString();
@@ -57,6 +59,7 @@ export default function InstagramShareDemo({ book }: { book: BookInfo }) {
       title: book.title,
       author: book.author,
       price: book.price,
+      cover: book.coverImageUrl,
     });
     const path = `/api/book-share-sticker?${params.toString()}`;
     return typeof window === "undefined" ? path : new URL(path, window.location.origin).toString();

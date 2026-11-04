@@ -1,18 +1,26 @@
+import Image from "next/image";
 import InstagramShareDemo from "@/components/InstagramShareDemo";
 
 const BOOK = {
-  title: "달러구트 꿈 백화점",
-  author: "이미예 지음",
-  price: "14,800원",
-  productUrl: "https://product.kyobobook.co.kr/detail/S000001810447",
+  title: "가호",
+  author: "무라카미 하루키 지음 · 홍은주 옮김",
+  price: "18,500원",
+  productUrl: "https://product.kyobobook.co.kr/detail/S000221505184",
+  coverImageUrl: "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791141691370.jpg?t=2989655",
 };
 
 export default function Home() {
   return (
     <div className="flex min-h-screen flex-col items-center gap-10 bg-zinc-50 px-6 py-16 font-sans dark:bg-black">
       <div className="flex w-full max-w-md flex-col items-center gap-4 rounded-2xl border border-black/10 bg-white p-6 shadow-sm dark:border-white/15 dark:bg-zinc-900">
-        <div className="flex h-56 w-40 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-[#3a5a8c] to-[#16213e] text-center text-xs font-medium text-white/80">
-          <span className="px-2">{BOOK.title}</span>
+        <div className="h-56 w-40 overflow-hidden rounded-lg shadow-md">
+          <Image
+            src={BOOK.coverImageUrl}
+            alt={BOOK.title}
+            width={160}
+            height={224}
+            className="h-full w-full object-cover"
+          />
         </div>
         <div className="flex flex-col items-center gap-1 text-center">
           <p className="text-lg font-semibold text-black dark:text-zinc-50">{BOOK.title}</p>
