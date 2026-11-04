@@ -36,9 +36,9 @@ export function BookCard({
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
         borderRadius: 28,
-        background: "#ffffff",
-        border: "1px solid #e8e8ec",
-        boxShadow: "0 30px 80px rgba(0,0,0,0.18)",
+        background: "#121212",
+        border: "1px solid rgba(255,255,255,0.08)",
+        boxShadow: "0 30px 80px rgba(0,0,0,0.4)",
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
@@ -86,7 +86,7 @@ export function BookCard({
           justifyContent: "center",
           fontSize: 64,
           fontWeight: 700,
-          color: "#16213e",
+          color: "#ffffff",
           lineHeight: 1.25,
           marginTop: 36,
           textAlign: "center",
@@ -100,7 +100,7 @@ export function BookCard({
           maxWidth: CARD_WIDTH - PADDING * 2,
           justifyContent: "center",
           fontSize: 28,
-          color: "#6b7280",
+          color: "#b3b3b3",
           marginTop: 10,
           textAlign: "center",
         }}
@@ -108,8 +108,23 @@ export function BookCard({
         {author}
       </div>
 
-      {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
-      <img src={LOGO_DATA_URI} alt="" width={64} height={64} style={{ width: 64, height: 64, marginTop: 36 }} />
+      {/* Logo PNG has an opaque white background, so it needs its own white badge to read
+          cleanly on this dark card. */}
+      <div
+        style={{
+          display: "flex",
+          width: 76,
+          height: 76,
+          borderRadius: 16,
+          background: "#ffffff",
+          alignItems: "center",
+          justifyContent: "center",
+          marginTop: 36,
+        }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
+        <img src={LOGO_DATA_URI} alt="" width={56} height={56} style={{ width: 56, height: 56 }} />
+      </div>
     </div>
   );
 }
