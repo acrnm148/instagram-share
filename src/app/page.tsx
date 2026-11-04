@@ -6,8 +6,7 @@ const BOOK = {
   author: "무라카미 하루키 지음 · 홍은주 옮김",
   price: "18,500원",
   productUrl: "https://product.kyobobook.co.kr/detail/S000221505184",
-  coverImageUrl:
-    "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/addt/9791141691370_01.jpg?t=2989660",
+  coverImageUrl: "https://contents.kyobobook.co.kr/sih/fit-in/400x0/pdt/9791141691370.jpg?t=2989655",
 };
 
 export default function Home() {
