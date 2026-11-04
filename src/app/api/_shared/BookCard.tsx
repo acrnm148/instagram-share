@@ -52,7 +52,10 @@ export function BookCard({
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
         borderRadius: 28,
-        background: "#121212",
+        // Semi-transparent, not flat black — the ambient color behind it (the cover's
+        // own dominant color, set by the caller) shows through, like Spotify's tinted
+        // dark card rather than an opaque box unrelated to the art.
+        background: "rgba(0,0,0,0.72)",
         border: "1px solid rgba(255,255,255,0.08)",
         boxShadow: "0 30px 80px rgba(0,0,0,0.4)",
         flexDirection: "column",
