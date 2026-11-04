@@ -1,6 +1,3 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-
 // Shared by book-share-card and book-share-sticker's ImageResponse renders — not a
 // route (lives outside any route.tsx), just a JSX factory for the card itself.
 //
@@ -19,10 +16,11 @@ const TITLE_SIZE = 64;
 const TITLE_HEIGHT = Math.round(TITLE_SIZE * 1.25);
 const AUTHOR_SIZE = 28;
 const AUTHOR_HEIGHT = Math.round(AUTHOR_SIZE * 1.3);
-const LOGO_BADGE = 76;
+const BRAND_SIZE = 26;
+const BRAND_HEIGHT = Math.round(BRAND_SIZE * 1.3);
 const GAP_AFTER_IMAGE = 36;
 const GAP_AFTER_TITLE = 10;
-const GAP_AFTER_AUTHOR = 36;
+const GAP_AFTER_AUTHOR = 28;
 
 // Precomputed so the ImageResponse canvas is sized exactly to its content — satori
 // renders to a fixed-size raster, it can't size the canvas to content automatically.
@@ -34,14 +32,9 @@ export const CARD_HEIGHT =
   GAP_AFTER_TITLE +
   AUTHOR_HEIGHT +
   GAP_AFTER_AUTHOR +
-  LOGO_BADGE;
+  BRAND_HEIGHT;
 
 export { CARD_WIDTH };
-
-// satori can't read local files by path, so the logo is inlined as a data URI.
-const LOGO_DATA_URI = `data:image/png;base64,${readFileSync(
-  join(process.cwd(), "public", "kyobo-logo.png"),
-).toString("base64")}`;
 
 export function BookCard({
   title,
@@ -63,10 +56,9 @@ export function BookCard({
         border: "1px solid rgba(255,255,255,0.08)",
         boxShadow: "0 30px 80px rgba(0,0,0,0.4)",
         flexDirection: "column",
-        alignItems: "center",
+        alignItems: "flex-start",
         justifyContent: "center",
         padding: PADDING,
-        textAlign: "center",
       }}
     >
       {cover ? (
@@ -105,13 +97,12 @@ export function BookCard({
         style={{
           display: "flex",
           maxWidth: IMAGE_WIDTH,
-          justifyContent: "center",
           fontSize: TITLE_SIZE,
           fontWeight: 700,
           color: "#ffffff",
           lineHeight: 1.25,
           marginTop: GAP_AFTER_IMAGE,
-          textAlign: "center",
+          textAlign: "left",
         }}
       >
         {title}
@@ -120,32 +111,26 @@ export function BookCard({
         style={{
           display: "flex",
           maxWidth: IMAGE_WIDTH,
-          justifyContent: "center",
           fontSize: AUTHOR_SIZE,
           color: "#b3b3b3",
           marginTop: GAP_AFTER_TITLE,
-          textAlign: "center",
+          textAlign: "left",
         }}
       >
         {author}
       </div>
 
-      {/* Logo PNG has an opaque white background, so it needs its own white badge to read
-          cleanly on this dark card. */}
       <div
         style={{
           display: "flex",
-          width: LOGO_BADGE,
-          height: LOGO_BADGE,
-          borderRadius: 16,
-          background: "#ffffff",
-          alignItems: "center",
-          justifyContent: "center",
+          fontSize: BRAND_SIZE,
+          fontWeight: 700,
+          color: "#ffffff",
+          letterSpacing: 1,
           marginTop: GAP_AFTER_AUTHOR,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
-        <img src={LOGO_DATA_URI} alt="" width={56} height={56} style={{ width: 56, height: 56 }} />
+        교보문고
       </div>
     </div>
   );
