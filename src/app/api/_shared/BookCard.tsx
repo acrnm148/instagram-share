@@ -2,18 +2,41 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
 // Shared by book-share-card and book-share-sticker's ImageResponse renders — not a
-// route (lives outside any route.tsx), just a JSX factory for the 760x1080 card itself.
+// route (lives outside any route.tsx), just a JSX factory for the card itself.
 //
-// Layout mirrors Spotify's "share to story" sticker: cover art flush to the card's inner
-// edges, left-aligned title/author directly under it, and a small platform logo badge
-// at the bottom — rather than the old centered, mostly-empty text card.
+// Layout mirrors Spotify's "share to story" sticker: cover art flush to the card's
+// inner edges at its own natural proportions (no cropping/stretching to a fixed box),
+// so the card's overall shape follows the book cover's — tall and narrow, not square.
 const CARD_WIDTH = 760;
-const CARD_HEIGHT = 1080;
 const PADDING = 32;
-// Korean book covers run ~400:578 (width:height) — kept smaller than the card's full
-// inner width now, at that same ratio, instead of stretching/cropping to fill it.
-const IMAGE_WIDTH = 420;
+
+// Korean book covers run ~400:578 (width:height) — the card is exactly this ratio at
+// its full inner width, rather than force-cropping into an arbitrary box shape.
+const IMAGE_WIDTH = CARD_WIDTH - PADDING * 2;
 const IMAGE_HEIGHT = Math.round((IMAGE_WIDTH * 578) / 400);
+
+const TITLE_SIZE = 64;
+const TITLE_HEIGHT = Math.round(TITLE_SIZE * 1.25);
+const AUTHOR_SIZE = 28;
+const AUTHOR_HEIGHT = Math.round(AUTHOR_SIZE * 1.3);
+const LOGO_BADGE = 76;
+const GAP_AFTER_IMAGE = 36;
+const GAP_AFTER_TITLE = 10;
+const GAP_AFTER_AUTHOR = 36;
+
+// Precomputed so the ImageResponse canvas is sized exactly to its content — satori
+// renders to a fixed-size raster, it can't size the canvas to content automatically.
+export const CARD_HEIGHT =
+  PADDING * 2 +
+  IMAGE_HEIGHT +
+  GAP_AFTER_IMAGE +
+  TITLE_HEIGHT +
+  GAP_AFTER_TITLE +
+  AUTHOR_HEIGHT +
+  GAP_AFTER_AUTHOR +
+  LOGO_BADGE;
+
+export { CARD_WIDTH };
 
 // satori can't read local files by path, so the logo is inlined as a data URI.
 const LOGO_DATA_URI = `data:image/png;base64,${readFileSync(
@@ -56,9 +79,8 @@ export function BookCard({
           style={{
             width: IMAGE_WIDTH,
             height: IMAGE_HEIGHT,
-            objectFit: "contain",
-            borderRadius: 12,
-            boxShadow: "0 12px 30px rgba(0,0,0,0.18)",
+            objectFit: "cover",
+            borderRadius: 16,
           }}
         />
       ) : (
@@ -82,13 +104,13 @@ export function BookCard({
       <div
         style={{
           display: "flex",
-          maxWidth: CARD_WIDTH - PADDING * 2,
+          maxWidth: IMAGE_WIDTH,
           justifyContent: "center",
-          fontSize: 64,
+          fontSize: TITLE_SIZE,
           fontWeight: 700,
           color: "#ffffff",
           lineHeight: 1.25,
-          marginTop: 36,
+          marginTop: GAP_AFTER_IMAGE,
           textAlign: "center",
         }}
       >
@@ -97,11 +119,11 @@ export function BookCard({
       <div
         style={{
           display: "flex",
-          maxWidth: CARD_WIDTH - PADDING * 2,
+          maxWidth: IMAGE_WIDTH,
           justifyContent: "center",
-          fontSize: 28,
+          fontSize: AUTHOR_SIZE,
           color: "#b3b3b3",
-          marginTop: 10,
+          marginTop: GAP_AFTER_TITLE,
           textAlign: "center",
         }}
       >
@@ -113,13 +135,13 @@ export function BookCard({
       <div
         style={{
           display: "flex",
-          width: 76,
-          height: 76,
+          width: LOGO_BADGE,
+          height: LOGO_BADGE,
           borderRadius: 16,
           background: "#ffffff",
           alignItems: "center",
           justifyContent: "center",
-          marginTop: 36,
+          marginTop: GAP_AFTER_AUTHOR,
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- next/og renders via satori, not next/image */}
