@@ -89,12 +89,15 @@ case "shareInstagramStory":
 
 
 Android
-
-
+```kotlin
 private const val FACEBOOK_APP_ID = "1817170559719071"
 // ...
 putExtra("source_application", FACEBOOK_APP_ID)
+```
+
+
 iOS
-
-
+```swift
 URL(string: "instagram-stories://share?source_application=1817170559719071")
+```
+
