@@ -86,3 +86,15 @@ case "shareInstagramStory":
 
 > 💡 **Android와의 차이**
 > iOS는 인텐트 대신 **페이스트보드에 이미지를 올려두고 스킴을 여는 방식**입니다. 그래서 이미지 전달 경로가 Android와 완전히 다릅니다.
+
+
+Android
+
+
+private const val FACEBOOK_APP_ID = "1817170559719071"
+// ...
+putExtra("source_application", FACEBOOK_APP_ID)
+iOS
+
+
+URL(string: "instagram-stories://share?source_application=1817170559719071")
