@@ -41,6 +41,44 @@
 private fun respond(callback: String, status: String) =
     webView.post { webView.evaluateJavascript("$callback('$status')", null) }
 ```
+v2
+```kotlin
+"shareInstagramStory" -> {
+    if (!isInstalled("com.instagram.android")) return respond(callback, "not_installed")
+
+    val stickerUri = try {
+        base64ToContentUri(params.optString("stickerImageBase64"), "story_sticker.png")
+    } catch (e: Exception) {
+        return respond(callback, "fail")
+    }
+
+    val intent = Intent("com.instagram.share.ADD_TO_STORY").apply {
+        type = "image/png"
+        putExtra("source_application", FACEBOOK_APP_ID)
+        putExtra("interactive_asset_uri", stickerUri)
+        params.optString("topColor").takeIf { it.isNotEmpty() }?.let { putExtra("top_background_color", it) }
+        params.optString("bottomColor").takeIf { it.isNotEmpty() }?.let { putExtra("bottom_background_color", it) }
+        params.optString("linkUrl").takeIf { it.isNotEmpty() }?.let { putExtra("content_url", it) }
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+    }
+    // 스티커는 setData가 아니라 extra로 넘기므로 인스타그램에 읽기 권한을 직접 부여해야 함
+    grantUriPermission("com.instagram.android", stickerUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+    if (intent.resolveActivity(packageManager) == null) return respond(callback, "unsupported_platform")
+    startActivity(intent)
+    respond(callback, "success")
+}
+
+// 새로 필요한 헬퍼: base64 → cacheDir 파일 → FileProvider content:// URI
+private fun base64ToContentUri(base64: String, fileName: String): Uri {
+    require(base64.isNotEmpty()) { "empty image" }
+    val bytes = Base64.decode(base64, Base64.DEFAULT)
+    val dir = File(cacheDir, "shared_images").apply { mkdirs() }
+    val file = File(dir, fileName).apply { writeBytes(bytes) }
+    return FileProvider.getUriForFile(this, "$packageName.fileprovider", file)
+}
+```
 
 #### Manifest 선행 조건
 
