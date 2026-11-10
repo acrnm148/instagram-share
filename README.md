@@ -41,7 +41,8 @@
 private fun respond(callback: String, status: String) =
     webView.post { webView.evaluateJavascript("$callback('$status')", null) }
 ```
-v2
+
+### 추가 수정 요청
 ```kotlin
 "shareInstagramStory" -> {
     if (!isInstalled("com.instagram.android")) return respond(callback, "not_installed")
@@ -56,13 +57,16 @@ v2
         type = "image/png"
         putExtra("source_application", FACEBOOK_APP_ID)
         putExtra("interactive_asset_uri", stickerUri)
-        params.optString("topColor").takeIf { it.isNotEmpty() }?.let { putExtra("top_background_color", it) }
-        params.optString("bottomColor").takeIf { it.isNotEmpty() }?.let { putExtra("bottom_background_color", it) }
-        params.optString("linkUrl").takeIf { it.isNotEmpty() }?.let { putExtra("content_url", it) }
+        // 인스타그램은 단색 옵션이 없어서 상단/하단에 같은 색을 넣어 단색으로 만듦
+        params.optString("backgroundColor").takeIf { it.isNotEmpty() }?.let {
+            putExtra("top_background_color", it)
+            putExtra("bottom_background_color", it)
+        }
+        params.optString("linkUrl").takeIf { it.isNotEmpty() }
+            ?.let { putExtra("content_url", it) }
         addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     }
-    // 스티커는 setData가 아니라 extra로 넘기므로 인스타그램에 읽기 권한을 직접 부여해야 함
     grantUriPermission("com.instagram.android", stickerUri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
 
     if (intent.resolveActivity(packageManager) == null) return respond(callback, "unsupported_platform")
@@ -70,7 +74,8 @@ v2
     respond(callback, "success")
 }
 
-// 새로 필요한 헬퍼: base64 → cacheDir 파일 → FileProvider content:// URI
+import android.util.Base64
+
 private fun base64ToContentUri(base64: String, fileName: String): Uri {
     require(base64.isNotEmpty()) { "empty image" }
     val bytes = Base64.decode(base64, Base64.DEFAULT)
